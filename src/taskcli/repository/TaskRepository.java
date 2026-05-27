@@ -1,5 +1,6 @@
 package taskcli.repository;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -7,6 +8,7 @@ import taskcli.domain.Task;
 import taskcli.domain.exception.TaskExistsException;
 import taskcli.domain.exception.TaskManagerException;
 import taskcli.domain.exception.TaskNotFoundException;
+import taskcli.repository.filter.IFilter;
 import taskcli.spi.ITaskRepository;
 
 public class TaskRepository implements ITaskRepository {
@@ -17,12 +19,12 @@ public class TaskRepository implements ITaskRepository {
 		tasks = new ConcurrentHashMap<>();
 	}
 
-	public Task get(int id) {
-		Task foundTask = tasks.get(id);
-		if (foundTask == null) {
-			throw new TaskNotFoundException(id);
+	public List<Task> get(IFilter filter) {
+		if (filter == null) {
+			throw new IllegalArgumentException("No filter specified.");
 		}
-		return new Task(foundTask);
+		List<Task> foundTasks = filter.apply(tasks.values().stream().toList());
+		return foundTasks;
 	}
 
 	public void create(Task task) {
@@ -56,19 +58,17 @@ public class TaskRepository implements ITaskRepository {
 		tasks.put(newTask.getId(), newTask);
 	}
 
+
 	@Override
 	public String toString() {
 		if (tasks.isEmpty()) {
 			return "No tasks found.";
 		}
-
 		StringBuilder sb = new StringBuilder();
 		sb.append("--- TASK LIST ---\n");
-
 		for (Task task : tasks.values()) {
 			sb.append(task.toString()).append("\n");
 		}
-
 		sb.append("-----------------");
 		return sb.toString();
 	}

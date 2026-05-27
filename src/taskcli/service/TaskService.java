@@ -1,8 +1,13 @@
 package taskcli.service;
 
+import java.util.List;
+
 import taskcli.domain.IdGenerator;
 import taskcli.domain.Task;
 import taskcli.domain.TaskStatus;
+import taskcli.domain.exception.TaskNotFoundException;
+import taskcli.repository.filter.FilterById;
+import taskcli.repository.filter.FilterByStatus;
 import taskcli.spi.ITaskRepository;
 import taskcli.spi.ITaskService;
 
@@ -34,9 +39,26 @@ public class TaskService implements ITaskService {
 
 	@Override
 	public void updateStatus(int id, TaskStatus status) {
-		Task task = taskRepository.get(id);
+		Task task = getTaskById(id);
 		task.setTaskStatus(status);
 		taskRepository.update(task);
+	}
+
+	@Override
+	public List<Task> searchByStatus(TaskStatus status) {
+		List<Task> foundTasks = taskRepository.get(new FilterByStatus(status));
+		return foundTasks;
+	}
+
+	private Task getTaskById(int id) {
+		List<Task> foundTasks = taskRepository.get(new FilterById(id));
+		if (foundTasks.size() > 1) {
+			throw new IllegalStateException("Duplicate ids in tasks.");
+		}
+		if (foundTasks.size() == 0) {
+			throw new TaskNotFoundException(id);
+		}
+		return foundTasks.get(0);
 	}
 
 }

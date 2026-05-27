@@ -1,5 +1,8 @@
 package taskcli.ui;
 
+import java.util.List;
+
+import taskcli.domain.Task;
 import taskcli.domain.TaskStatus;
 import taskcli.factory.ServiceFactory;
 import taskcli.spi.IServiceFactory;
@@ -27,6 +30,8 @@ public class Application {
 		taskService.updateStatus(2, TaskStatus.DONE);
 		System.out.println(taskService.toString());
 
+		List<Task> doneTasks = taskService.searchByStatus(TaskStatus.DONE);
+		System.out.println(doneTasks);
 	}
 
 }
