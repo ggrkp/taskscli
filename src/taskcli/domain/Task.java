@@ -2,6 +2,8 @@ package taskcli.domain;
 
 public class Task {
 
+	public Task() {}
+	
 	public Task(Task other) {
 		this.id = other.id;
 		this.title = other.title;

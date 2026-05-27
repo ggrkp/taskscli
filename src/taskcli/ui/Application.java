@@ -12,9 +12,11 @@ public class Application {
 
 	public static void main(String[] args) {
 		IServiceFactory serviceFactory = new ServiceFactory();
-
-		ITaskService taskService = serviceFactory.createTaskService();
-
+		
+		ITaskService taskService = serviceFactory.createFileBasedTaskService("tasks.json");
+		
+//		ITaskService taskService = serviceFactory.createTaskService();
+//
 		taskService.createTask("New Task Title 1");
 		taskService.createTask("New Task Title 2");
 		taskService.createTask("New Task Title 3");

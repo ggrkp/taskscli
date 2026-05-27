@@ -8,4 +8,14 @@ public class IdGenerator {
 	public static int nextId() {
 		return counter.incrementAndGet();
 	}
+
+	public static void synchronize(int currentMaxId) {
+		int existing;
+		do {
+			existing = counter.get();
+			if (currentMaxId <= existing) {
+				break;
+			}
+		} while (!counter.compareAndSet(existing, currentMaxId));
+	}
 }

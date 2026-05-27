@@ -19,12 +19,17 @@ public class TaskRepository implements ITaskRepository {
 		tasks = new ConcurrentHashMap<>();
 	}
 
-	public List<Task> get(IFilter filter) {
-		if (filter == null) {
-			throw new IllegalArgumentException("No filter specified.");
+	public Task get(int id) {
+		Task foundTask = tasks.get(id);
+		if (foundTask == null) {
+			throw new TaskNotFoundException(id);
 		}
-		List<Task> foundTasks = filter.apply(tasks.values().stream().toList());
-		return foundTasks;
+		return new Task(foundTask);
+	}
+
+	public List<Task> get(IFilter filter) {
+		List<Task> filteredResults = filter.apply(List.copyOf(tasks.values()));
+		return filteredResults.stream().map(Task::new).toList();
 	}
 
 	public void create(Task task) {
@@ -57,7 +62,6 @@ public class TaskRepository implements ITaskRepository {
 		Task newTask = new Task(updatedTask);
 		tasks.put(newTask.getId(), newTask);
 	}
-
 
 	@Override
 	public String toString() {

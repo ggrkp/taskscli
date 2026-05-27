@@ -13,4 +13,8 @@ public class ServiceFactory implements IServiceFactory {
 		return new TaskService(repositoryFactory.createTaskRepository());
 	}
 
+	public ITaskService createFileBasedTaskService(String filePath) {
+		return new TaskService(repositoryFactory.createFileSystemTaskRepository(filePath));
+	}
+
 }

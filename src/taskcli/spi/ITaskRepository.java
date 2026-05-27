@@ -6,6 +6,9 @@ import taskcli.domain.Task;
 import taskcli.repository.filter.IFilter;
 
 public interface ITaskRepository {
+
+	Task get(int id);
+
 	List<Task> get(IFilter filter);
 
 	void create(Task task);

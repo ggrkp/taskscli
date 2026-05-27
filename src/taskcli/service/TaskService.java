@@ -39,7 +39,7 @@ public class TaskService implements ITaskService {
 
 	@Override
 	public void updateStatus(int id, TaskStatus status) {
-		Task task = getTaskById(id);
+		Task task = taskRepository.get(id);
 		task.setTaskStatus(status);
 		taskRepository.update(task);
 	}
@@ -48,17 +48,6 @@ public class TaskService implements ITaskService {
 	public List<Task> searchByStatus(TaskStatus status) {
 		List<Task> foundTasks = taskRepository.get(new FilterByStatus(status));
 		return foundTasks;
-	}
-
-	private Task getTaskById(int id) {
-		List<Task> foundTasks = taskRepository.get(new FilterById(id));
-		if (foundTasks.size() > 1) {
-			throw new IllegalStateException("Duplicate ids in tasks.");
-		}
-		if (foundTasks.size() == 0) {
-			throw new TaskNotFoundException(id);
-		}
-		return foundTasks.get(0);
 	}
 
 }
