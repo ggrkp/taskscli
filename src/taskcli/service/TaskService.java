@@ -50,4 +50,9 @@ public class TaskService implements ITaskService {
 		return foundTasks;
 	}
 
+	@Override
+	public void clear() {
+		taskRepository.clear();
+	}
+
 }

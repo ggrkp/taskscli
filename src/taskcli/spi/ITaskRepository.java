@@ -16,5 +16,7 @@ public interface ITaskRepository {
 	void remove(int id);
 
 	void update(Task updatedTask);
+	
+	void clear();
 
 }

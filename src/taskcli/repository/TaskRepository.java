@@ -77,4 +77,9 @@ public class TaskRepository implements ITaskRepository {
 		return sb.toString();
 	}
 
+	@Override
+	public void clear() {
+		this.tasks.clear();
+	}
+
 }

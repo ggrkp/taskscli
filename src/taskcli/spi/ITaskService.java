@@ -14,4 +14,6 @@ public interface ITaskService {
 	void removeTask(int id);
 
 	void updateStatus(int id, TaskStatus status);
+	
+	void clear();
 }

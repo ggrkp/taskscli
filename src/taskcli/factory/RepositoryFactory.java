@@ -1,7 +1,7 @@
 package taskcli.factory;
 
 import taskcli.repository.TaskRepository;
-import taskcli.repository.FileSystemTaskRepositoryDecorator;
+import taskcli.repository.FileSystemTaskRepositoryWrapper;
 
 import taskcli.spi.IRepositoryFactory;
 import taskcli.spi.ITaskRepository;
@@ -13,7 +13,7 @@ public class RepositoryFactory implements IRepositoryFactory {
 	}
 
 	public ITaskRepository createFileSystemTaskRepository(String filePath) {
-		return new FileSystemTaskRepositoryDecorator(filePath);
+		return new FileSystemTaskRepositoryWrapper(filePath);
 	}
 
 }

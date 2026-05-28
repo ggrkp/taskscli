@@ -1,39 +1,52 @@
 package taskcli.ui;
 
-import java.util.List;
+import java.util.Scanner;
 
-import taskcli.domain.Task;
-import taskcli.domain.TaskStatus;
+import taskcli.command.ICommand;
+import taskcli.domain.exception.InvalidCommandException;
+import taskcli.domain.exception.TaskManagerException;
+import taskcli.factory.CommandFactory;
 import taskcli.factory.ServiceFactory;
-import taskcli.spi.IServiceFactory;
-import taskcli.spi.ITaskService;
 
 public class Application {
 
 	public static void main(String[] args) {
-		IServiceFactory serviceFactory = new ServiceFactory();
-		
-		ITaskService taskService = serviceFactory.createFileBasedTaskService("tasks.json");
-		
-//		ITaskService taskService = serviceFactory.createTaskService();
-//
-		taskService.createTask("New Task Title 1");
-		taskService.createTask("New Task Title 2");
-		taskService.createTask("New Task Title 3");
-		taskService.createTask("New Task Title 4");
+		ServiceFactory serviceFactory = new ServiceFactory();
+		CommandFactory cmdFactory = new CommandFactory(serviceFactory.createFileBasedTaskService("tasks.json"));
+		System.out.println("=========================================");
+		System.out.println("    WELCOME TO THE TASK CLI MANAGER      ");
+		System.out.println("=========================================");
+		System.out.println("Available commands: add, remove, update, list, search, clear, exit\n");
 
-		System.out.println(taskService.toString());
+		try (Scanner scanner = new Scanner(System.in)) {
+			boolean running = true;
 
-		taskService.removeTask(1);
-		taskService.removeTask(3);
-		taskService.createTask("New Task Title 4");
-		System.out.println(taskService.toString());
+			while (running) {
+				System.out.print("task-cli> ");
+				String input = scanner.nextLine().trim();
+				if (input.isEmpty())
+					continue;
 
-		taskService.updateStatus(2, TaskStatus.DONE);
-		System.out.println(taskService.toString());
+				String[] segments = input.split(" ", 2);
+				String commandKeyword = segments[0];
+				String[] commandArgs = (segments.length > 1) ? new String[] { segments[1] } : new String[0];
 
-		List<Task> doneTasks = taskService.searchByStatus(TaskStatus.DONE);
-		System.out.println(doneTasks);
+				try {
+					ICommand executionCommand = cmdFactory.getCommand(commandKeyword);
+					if (executionCommand == null) {
+						System.out.printf(
+								"Error: '%s' is not a recognized command. Type 'help' to view available options.\n",
+								commandKeyword);
+						continue;
+					}
+					executionCommand.execute(commandArgs);
+				} catch (TaskManagerException | InvalidCommandException exception) {
+					System.out.println(exception.getMessage());
+					continue;
+				}
+
+				System.out.println();
+			}
+		}
 	}
-
 }

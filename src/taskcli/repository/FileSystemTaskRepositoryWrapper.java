@@ -19,17 +19,19 @@ import taskcli.domain.Task;
 import taskcli.repository.filter.IFilter;
 import taskcli.spi.ITaskRepository;
 
-public class FileSystemTaskRepositoryDecorator implements ITaskRepository {
+public class FileSystemTaskRepositoryWrapper implements ITaskRepository {
 
-	private final ITaskRepository repository; // The inner memory repository
+	private final ITaskRepository repository;
+
 	private final Path path;
+
 	private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-	public FileSystemTaskRepositoryDecorator(String filePath) {
+	public FileSystemTaskRepositoryWrapper(String filePath) {
 		this(filePath, new TaskRepository());
 	}
 
-	public FileSystemTaskRepositoryDecorator(String filePath, ITaskRepository repository) {
+	public FileSystemTaskRepositoryWrapper(String filePath, ITaskRepository repository) {
 		if (filePath == null || filePath.isEmpty()) {
 			throw new IllegalArgumentException("File path cannot be null");
 		}
@@ -37,6 +39,39 @@ public class FileSystemTaskRepositoryDecorator implements ITaskRepository {
 		this.path = Paths.get(filePath);
 		initializeFileStorage();
 		loadTasksIntoMemory();
+	}
+
+	@Override
+	public Task get(int id) {
+		return repository.get(id);
+	}
+
+	@Override
+	public List<Task> get(IFilter filter) {
+		return repository.get(filter);
+	}
+
+	@Override
+	public void create(Task task) {
+		repository.create(task);
+		flushToDisk();
+	}
+
+	@Override
+	public void remove(int id) {
+		repository.remove(id);
+		flushToDisk();
+	}
+
+	@Override
+	public void update(Task updatedTask) {
+		repository.update(updatedTask);
+		flushToDisk();
+	}
+
+	@Override
+	public String toString() {
+		return repository.toString();
 	}
 
 	private void initializeFileStorage() {
@@ -83,10 +118,10 @@ public class FileSystemTaskRepositoryDecorator implements ITaskRepository {
 		}
 	}
 
-	// Dynamic disk flush trigger
 	private synchronized void flushToDisk() {
-		try (Writer writer = Files.newBufferedWriter(path, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
-			List<Task> currentTasksInMap = repository.get(tasksPool -> tasksPool);
+		try (Writer writer = Files.newBufferedWriter(path, StandardOpenOption.WRITE,
+				StandardOpenOption.TRUNCATE_EXISTING)) {
+			List<Task> currentTasksInMap = repository.get(tasks -> tasks);
 			gson.toJson(currentTasksInMap, writer);
 		} catch (IOException e) {
 			throw new RuntimeException("Storage failure: Could not commit updates to system disk.", e);
@@ -94,35 +129,9 @@ public class FileSystemTaskRepositoryDecorator implements ITaskRepository {
 	}
 
 	@Override
-	public Task get(int id) {
-		return repository.get(id);
-	}
-
-	@Override
-	public List<Task> get(IFilter filter) {
-		return repository.get(filter);
-	}
-
-	@Override
-	public void create(Task task) {
-		repository.create(task);
+	public void clear() {
+		this.repository.clear();
 		flushToDisk();
 	}
 
-	@Override
-	public void remove(int id) {
-		repository.remove(id);
-		flushToDisk();
-	}
-
-	@Override
-	public void update(Task updatedTask) {
-		repository.update(updatedTask); 
-		flushToDisk();
-	}
-
-	@Override
-	public String toString() {
-		return repository.toString();
-	}
 }
